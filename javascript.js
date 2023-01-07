@@ -1,25 +1,81 @@
-const gameBoard = (() => {
-    const board = ['X', 'O', 'X', 'O', 'O', 'X', 'X', 'X', 'O'];
+const Player = (icon) => {
+    this.icon = icon;
 
-    return {
-        board
+    const returnIcon = () => {
+        return icon;
     };
+
+    return {returnIcon};
+}
+
+const gameBoard = (() => {
+    const board = [
+        '', '', '', 
+        '', '', '', 
+        '', '', ''
+    ];
+
+    const resetBoard = () => {
+        for (let i = 0; i < board.length; i++) {
+            board[i] = '';
+        }
+    };
+
+    const getIndex = (index) => {
+        return board[index];
+    };
+
+    return { board, resetBoard, getIndex };
 })();
 
 const displayController = (() => {
-    const gameContainer = document.getElementById('game-board');
+    const cards = document.querySelectorAll('.card');
     
+    cards.forEach ((card) => {
+        card.addEventListener('click', (e) => {
+            let index = e.target.dataset.index;
+            if (gameBoard.board[index] !== '') return;
+            gameBoard.board[index] = gameController.playRound();
+            updateDisplay();
+        })
+    });
+
     const updateDisplay = () => {
-        for (let i = 0; i < gameBoard.board.length; i++) {
-            let card = document.createElement('div');
-            card.classList.add('card');
-            card.textContent = gameBoard.board[i];
-            console.log(gameBoard.board[i]);
-            gameContainer.appendChild(card);
-    }
-    }
+        for (let i = 0; i < cards.length; i++) {
+            cards[i].textContent = gameBoard.board[i];
+        }
+    };
 
     return { updateDisplay };
 })();
 
-displayController.updateDisplay();
+const gameController = (() => {
+    const playerX = Player('X');
+    const playerO = Player('O');
+    let turn = 0;
+    let gameOver = false;
+
+    const playRound = () => {
+        if (turn === 9) {
+            gameOver = true;
+            return;
+        }
+        if (turn % 2 === 0) {
+            turn++;
+            console.log(turn, playerX.returnIcon())
+            return playerX.returnIcon();
+        }
+        turn++;
+        console.log(turn, playerO.icon)
+        return playerO.returnIcon();
+    };
+
+    const resetGame = () => {
+        turn = 1;
+        gameOver = false;
+        gameBoard.resetBoard();
+    }
+
+    return { playRound, resetGame };
+
+})();
