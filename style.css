@@ -42,15 +42,28 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    outline: 1px solid black;
+    border: 1px solid black;
     font-weight: bold;
     font-size: 32px;
 }
 
-.footer {
+.reset {
     display: flex;
     flex-shrink: 0;
     height: 100px;
     justify-content: center;
     align-items: center;
+}
+
+.resetBtn {
+    height: 50px;
+    width: 150px;
+    border-radius: 8px;
+    border-style: none;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.resetBtn:hover {
+    background-color: lightgray;
 }
