@@ -35,6 +35,7 @@ const gameBoard = (() => {
 const displayController = (() => {
     const cards = document.querySelectorAll('.card');
     const resetBtn = document.querySelector('.resetBtn');
+    const gameMessage = document.querySelector('.text');
     
     cards.forEach ((card) => {
         card.addEventListener('click', (e) => {
@@ -47,6 +48,7 @@ const displayController = (() => {
     resetBtn.addEventListener('click', () => {
         gameBoard.resetBoard()
         gameController.resetGame()
+        setGameMessage("Player X's turn")
         updateDisplay();
     })
 
@@ -56,37 +58,50 @@ const displayController = (() => {
         }
     };
 
+    const setGameMessage = (message) => {
+        gameMessage.textContent = message
+    }
 
+    const setGameResult = (winner) => {
+        if (winner === 'Draw') {
+            setGameMessage("It's a draw!");
+        } else {
+            setGameMessage(`Player ${winner} has won!`);
+        }
+    }
 
-    return { updateDisplay };
+    return { updateDisplay, setGameMessage, setGameResult };
 })();
 
 const gameController = (() => {
     const playerX = Player('X');
     const playerO = Player('O');
-    let turn = 0;
+    let turn = 1;
     let gameOver = false;
 
     const playRound = (index) => {
         gameBoard.inputMove(index, checkCurrentPlayer());
         if (checkWinner(index)) {
+            displayController.setGameResult(checkCurrentPlayer())
             gameOver = true;
             return;
         }
         if (turn === 9) {
+            displayController.setGameResult('Draw')
             gameOver = true;
             return;
         }
         turn++;
+        displayController.setGameMessage(`Player ${checkCurrentPlayer()}'s turn`)
     };
 
     const resetGame = () => {
-        turn = 0;
+        turn = 1;
         gameOver = false;
     }
 
     const checkCurrentPlayer = () => {
-        return turn % 2 === 0 ? playerX.returnIcon() : playerO.returnIcon();
+        return turn % 2 === 1 ? playerX.returnIcon() : playerO.returnIcon();
     }
 
     const checkWinner = (indexes) => {
@@ -100,7 +115,7 @@ const gameController = (() => {
             [0, 4, 8],
             [2, 4, 6]
         ];
-        
+
         return winConditions
         .filter((combination) => combination.includes(indexes))
         .some((possibleCombination) =>
