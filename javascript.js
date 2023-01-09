@@ -5,7 +5,7 @@ const Player = (icon) => {
         return icon;
     };
 
-    return {returnIcon};
+    return { returnIcon };
 }
 
 const gameBoard = (() => {
@@ -25,26 +25,38 @@ const gameBoard = (() => {
         return board[index];
     };
 
-    return { board, resetBoard, getIndex };
+    const inputMove = (index, icon) => {
+        board[index] = icon;
+    }
+
+    return { board, resetBoard, getIndex, inputMove };
 })();
 
 const displayController = (() => {
     const cards = document.querySelectorAll('.card');
+    const resetBtn = document.querySelector('.resetBtn');
     
     cards.forEach ((card) => {
         card.addEventListener('click', (e) => {
-            let index = e.target.dataset.index;
-            if (gameBoard.board[index] !== '') return;
-            gameBoard.board[index] = gameController.playRound();
+            if (gameController.checkGameOver() || card.textContent !== '') return;
+            gameController.playRound(parseInt(e.target.dataset.index));
             updateDisplay();
         })
     });
+
+    resetBtn.addEventListener('click', () => {
+        gameBoard.resetBoard()
+        gameController.resetGame()
+        updateDisplay();
+    })
 
     const updateDisplay = () => {
         for (let i = 0; i < cards.length; i++) {
             cards[i].textContent = gameBoard.board[i];
         }
     };
+
+
 
     return { updateDisplay };
 })();
@@ -55,27 +67,52 @@ const gameController = (() => {
     let turn = 0;
     let gameOver = false;
 
-    const playRound = () => {
+    const playRound = (index) => {
+        gameBoard.inputMove(index, checkCurrentPlayer());
+        if (checkWinner(index)) {
+            gameOver = true;
+            return;
+        }
         if (turn === 9) {
             gameOver = true;
             return;
         }
-        if (turn % 2 === 0) {
-            turn++;
-            console.log(turn, playerX.returnIcon())
-            return playerX.returnIcon();
-        }
         turn++;
-        console.log(turn, playerO.icon)
-        return playerO.returnIcon();
     };
 
     const resetGame = () => {
-        turn = 1;
+        turn = 0;
         gameOver = false;
-        gameBoard.resetBoard();
     }
 
-    return { playRound, resetGame };
+    const checkCurrentPlayer = () => {
+        return turn % 2 === 0 ? playerX.returnIcon() : playerO.returnIcon();
+    }
 
+    const checkWinner = (indexes) => {
+        const winConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+        
+        return winConditions
+        .filter((combination) => combination.includes(indexes))
+        .some((possibleCombination) =>
+        possibleCombination.every(
+            (index) => gameBoard.getIndex(index) === checkCurrentPlayer()
+            )
+        );
+    };
+
+    const checkGameOver = () => {
+        return gameOver;
+    }
+
+    return { playRound, resetGame, checkGameOver };
 })();
